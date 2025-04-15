@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Upload, Info } from "lucide-react";
@@ -8,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { ContextType } from "@/types";
 import { simulateAnalysis } from "@/utils/analysis";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const UploadForm = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const UploadForm = () => {
   const [context, setContext] = useState<ContextType>("job-interview");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -49,15 +51,32 @@ const UploadForm = () => {
     setIsLoading(true);
     
     try {
-      // In a real app, this would be an API call to analyze the file
-      // For now, we'll simulate the analysis
       const fileType = file.type.includes("video") ? "video" : "audio";
       const result = await simulateAnalysis(file.name, fileType as "video" | "audio", context);
       
-      // Store result in localStorage for demo purposes (in a real app, this would come from the backend)
+      // Save result to Supabase
+      const { error: saveError } = await supabase
+        .from('analysis_results')
+        .insert({
+          file_name: file.name,
+          file_type: fileType,
+          context,
+          score: result.score,
+          confidence: result.confidence,
+          verdict: result.verdict,
+          user_id: (await supabase.auth.getUser()).data.user?.id
+        });
+
+      if (saveError) throw saveError;
+      
+      // Store result for the results page
       localStorage.setItem("analysisResult", JSON.stringify(result));
       
-      // Navigate to results page
+      toast({
+        title: "Analysis Complete",
+        description: `Your ${fileType} has been analyzed successfully.`,
+      });
+      
       navigate("/results");
     } catch (err) {
       setError("An error occurred during analysis. Please try again.");

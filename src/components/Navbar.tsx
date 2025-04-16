@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import { Shield } from "lucide-react";
 import { Button } from "./ui/button";
+import ProfileMenu from "./ProfileMenu";
 
 const Navbar = () => {
   return (
@@ -20,6 +21,7 @@ const Navbar = () => {
             <Link to="/upload">
               <Button>Verify Media</Button>
             </Link>
+            <ProfileMenu />
           </div>
         </div>
       </div>

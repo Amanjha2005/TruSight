@@ -7,6 +7,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { Send, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { isDeepfakeRelatedQuery, getInitialMessage } from "@/utils/aiAssistant";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   role: "user" | "assistant";
@@ -38,20 +39,18 @@ const AIChatAssistant = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/ai-chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
+      const { data, error } = await supabase.functions.invoke('ai-chat', {
+        body: { message: input }
       });
 
-      if (!response.ok) throw new Error("Failed to get response");
+      if (error) throw new Error(error.message);
       
-      const data = await response.json();
       setMessages(prev => [...prev, { 
         role: "assistant", 
         content: data.response 
       }]);
     } catch (error) {
+      console.error("AI Chat Error:", error);
       toast({
         variant: "destructive",
         title: "Error",

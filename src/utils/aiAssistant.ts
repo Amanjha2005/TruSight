@@ -3,7 +3,8 @@ export const isDeepfakeRelatedQuery = (query: string): boolean => {
   const relevantKeywords = [
     'deepfake', 'fake', 'analysis', 'result', 'video', 'audio',
     'detection', 'authentic', 'manipulated', 'ai', 'generated',
-    'synthetic', 'media', 'trust', 'verification', 'report'
+    'synthetic', 'media', 'trust', 'verification', 'report',
+    'score', 'confidence', 'verdict'
   ];
   
   return relevantKeywords.some(keyword => 

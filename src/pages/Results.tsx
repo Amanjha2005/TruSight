@@ -1,6 +1,7 @@
 
 import MainLayout from "@/layouts/MainLayout";
 import ResultDisplay from "@/components/ResultDisplay";
+import AIChatAssistant from "@/components/AIChatAssistant";
 
 const Results = () => {
   return (
@@ -12,7 +13,16 @@ const Results = () => {
             Detailed results of your media analysis
           </p>
         </div>
-        <ResultDisplay />
+        <div className="space-y-8">
+          <ResultDisplay />
+          <div className="mt-8">
+            <h2 className="text-2xl font-semibold text-center mb-4">AI Assistant</h2>
+            <p className="text-center text-muted-foreground mb-6">
+              Have questions about your results? Our AI assistant can help explain them.
+            </p>
+            <AIChatAssistant />
+          </div>
+        </div>
       </div>
     </MainLayout>
   );

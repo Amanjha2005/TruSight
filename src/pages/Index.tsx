@@ -3,6 +3,7 @@ import { Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MainLayout from "@/layouts/MainLayout";
 import AIChatAssistant from "@/components/AIChatAssistant";
+import { MessageCircle } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -10,7 +11,6 @@ const Index = () => {
   return (
     <MainLayout>
       <div className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-16">
-        {/* Keep the hero section */}
         <section className="text-center">
           <div className="inline-block p-3 bg-primary/10 rounded-2xl mb-4">
             <Shield className="h-10 w-10 text-primary" />
@@ -26,11 +26,14 @@ const Index = () => {
           </Button>
         </section>
 
-        {/* Add the AI Chat Assistant */}
-        <section className="max-w-2xl mx-auto">
-          <h2 className="text-2xl font-semibold text-center mb-4">Ask Our AI Assistant</h2>
+        {/* Update the AI Chat Assistant section */}
+        <section className="max-w-2xl mx-auto bg-card border rounded-xl p-6">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <MessageCircle className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-semibold text-center">Chat with Echo</h2>
+          </div>
           <p className="text-center text-muted-foreground mb-6">
-            Have questions about deepfakes or media verification? Our AI assistant is here to help.
+            Have questions about deepfakes or media verification? Echo is here to help.
           </p>
           <AIChatAssistant />
         </section>

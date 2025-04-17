@@ -17,12 +17,19 @@ Prioritize quick, conversational responses while being friendly, engaging, and p
 Your top priority is responsiveness, reliability, and helpfulness.`
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
     const { message } = await req.json()
+    
+    if (!message || typeof message !== 'string') {
+      throw new Error('Invalid message format')
+    }
+
+    console.log("Received message:", message.substring(0, 50) + "...")
 
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
@@ -65,9 +72,23 @@ serve(async (req) => {
       })
     })
 
+    if (!response.ok) {
+      const errorData = await response.text()
+      console.error("Gemini API error:", errorData)
+      throw new Error(`Gemini API responded with status ${response.status}`)
+    }
+
     const data = await response.json()
+    
+    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
+      console.error("Unexpected API response structure:", JSON.stringify(data))
+      throw new Error("Unexpected API response structure")
+    }
+    
     const aiResponse = data.candidates[0].content.parts[0].text
 
+    console.log("AI response generated successfully")
+    
     return new Response(
       JSON.stringify({ response: aiResponse }),
       { 
@@ -75,9 +96,12 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error processing request:', error)
     return new Response(
-      JSON.stringify({ error: 'Failed to generate AI response' }),
+      JSON.stringify({ 
+        error: error.message || 'Failed to generate AI response',
+        details: error.stack
+      }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

@@ -1,18 +1,10 @@
 
 export const isDeepfakeRelatedQuery = (query: string): boolean => {
-  const relevantKeywords = [
-    'deepfake', 'fake', 'analysis', 'result', 'video', 'audio',
-    'detection', 'authentic', 'manipulated', 'ai', 'generated',
-    'synthetic', 'media', 'trust', 'verification', 'report',
-    'score', 'confidence', 'verdict'
-  ];
-  
-  return relevantKeywords.some(keyword => 
-    query.toLowerCase().includes(keyword)
-  );
+  // Always return true since we're allowing all types of questions now
+  return true;
 };
 
 export const getInitialMessage = () => ({
   role: "assistant" as const,
-  content: "Hello! I'm here to help you understand deepfake detection results and answer questions about AI-generated media. What would you like to know?"
+  content: "Hello! I'm Echo, your AI assistant. I can answer questions about deepfakes, AI-generated media, or any other topics you're curious about. How can I help you today?"
 });

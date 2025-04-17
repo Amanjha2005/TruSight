@@ -6,7 +6,7 @@ import { Card } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
 import { Send, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { isDeepfakeRelatedQuery, getInitialMessage } from "@/utils/aiAssistant";
+import { getInitialMessage } from "@/utils/aiAssistant";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
@@ -23,15 +23,6 @@ const AIChatAssistant = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
-
-    if (!isDeepfakeRelatedQuery(input)) {
-      setMessages(prev => [...prev, 
-        { role: "user", content: input },
-        { role: "assistant", content: "I can only help with questions about deepfakes, AI-generated content, and media verification. Please ask something related to these topics." }
-      ]);
-      setInput("");
-      return;
-    }
 
     const userMessage = { role: "user" as const, content: input };
     setMessages(prev => [...prev, userMessage]);
@@ -90,7 +81,7 @@ const AIChatAssistant = () => {
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about deepfake detection..."
+            placeholder="Ask me anything..."
             className="resize-none"
             rows={2}
           />

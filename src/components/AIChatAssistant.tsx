@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Card } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
-import { Send, RefreshCw } from "lucide-react";
+import { Send, RefreshCw, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getInitialMessage } from "@/utils/aiAssistant";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface Message {
   role: "user" | "assistant";
   content: string;
+  status?: "loading" | "error" | "success";
 }
 
 const AIChatAssistant = () => {
@@ -41,12 +42,22 @@ const AIChatAssistant = () => {
     setInput("");
     setIsLoading(true);
 
+    // Add a temporary loading message
+    setMessages(prev => [...prev, { 
+      role: "assistant", 
+      content: "Thinking...",
+      status: "loading" 
+    }]);
+
     try {
       const { data, error } = await supabase.functions.invoke('ai-chat', {
         body: { message: input }
       });
 
-      if (error) throw new Error(error.message);
+      // Remove the loading message
+      setMessages(prev => prev.slice(0, -1));
+
+      if (error) throw new Error(error.message || "Failed to get AI response");
       
       if (!data || !data.response) {
         throw new Error("No response received from AI");
@@ -54,7 +65,8 @@ const AIChatAssistant = () => {
       
       setMessages(prev => [...prev, { 
         role: "assistant", 
-        content: data.response 
+        content: data.response,
+        status: "success"
       }]);
       
       // Reset retry count on successful response
@@ -62,10 +74,14 @@ const AIChatAssistant = () => {
     } catch (error) {
       console.error("AI Chat Error:", error);
       
+      // Remove the loading message
+      setMessages(prev => prev.slice(0, -1));
+      
       // Add error message as assistant response
       setMessages(prev => [...prev, { 
         role: "assistant", 
-        content: "I'm sorry, I encountered an error processing your request. Please try again." 
+        content: "I'm sorry, I encountered an error processing your request. Please try again.",
+        status: "error" 
       }]);
       
       // Increment retry count
@@ -76,7 +92,7 @@ const AIChatAssistant = () => {
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to get AI response. Please try a different question.",
+          description: "Failed to get AI response. Please try again later or with a different question.",
         });
       }
     } finally {
@@ -102,57 +118,82 @@ const AIChatAssistant = () => {
     
     setMessages(newMessages);
     setIsLoading(true);
+
+    // Add a temporary loading message
+    setMessages(prev => [...prev, { 
+      role: "assistant", 
+      content: "Thinking...",
+      status: "loading" 
+    }]);
     
     try {
       const { data, error } = await supabase.functions.invoke('ai-chat', {
         body: { message: lastUserMessage.content }
       });
 
-      if (error) throw new Error(error.message);
+      // Remove the loading message
+      setMessages(prev => prev.slice(0, -1));
+
+      if (error) throw new Error(error.message || "Failed to get AI response");
+      
+      if (!data || !data.response) {
+        throw new Error("No response received from AI");
+      }
       
       setMessages(prev => [...prev, { 
         role: "assistant", 
-        content: data.response 
+        content: data.response,
+        status: "success" 
       }]);
+
+      // Reset retry count on successful response
+      setRetryCount(0);
     } catch (error) {
       console.error("AI Chat Retry Error:", error);
+      
+      // Remove the loading message
+      setMessages(prev => prev.slice(0, -1));
+      
+      setMessages(prev => [...prev, { 
+        role: "assistant", 
+        content: "I'm still having trouble processing your request. Maybe try phrasing your question differently?",
+        status: "error"
+      }]);
+
       toast({
         variant: "destructive",
         title: "Error",
         description: "Failed to get AI response on retry. Please try a different question.",
       });
-      
-      setMessages(prev => [...prev, { 
-        role: "assistant", 
-        content: "I'm still having trouble processing your request. Maybe try phrasing your question differently?" 
-      }]);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto overflow-hidden backdrop-blur-md bg-white/80 dark:bg-black/50 border border-white/20 dark:border-gray-800/50 shadow-lg">
+    <Card className="w-full max-w-2xl mx-auto overflow-hidden backdrop-blur-md bg-white/80 dark:bg-black/50 border border-white/20 dark:border-gray-800/50 shadow-lg animate-fade-in">
       <div className="p-4 space-y-4">
         <ScrollArea className="h-[400px] pr-4" ref={scrollAreaRef}>
           <div className="space-y-4">
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`p-3 rounded-lg transition-all duration-300 animate-fade-in ${
+                className={`p-3 rounded-lg transition-all duration-300 ${
                   message.role === "assistant"
-                    ? "bg-primary/10 ml-4"
-                    : "bg-muted mr-4"
-                }`}
+                    ? "bg-primary/10 ml-4 animate-scale-in"
+                    : "bg-muted mr-4 animate-scale-in"
+                } ${message.status === "error" ? "border-l-2 border-destructive" : ""}`}
               >
-                <p className="text-sm">{message.content}</p>
+                {message.status === "loading" ? (
+                  <div className="flex items-center space-x-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    <p className="text-sm text-muted-foreground">{message.content}</p>
+                  </div>
+                ) : (
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                )}
               </div>
             ))}
-            {isLoading && (
-              <div className="flex justify-center p-2">
-                <RefreshCw className="h-5 w-5 animate-spin text-primary" />
-              </div>
-            )}
           </div>
         </ScrollArea>
         
@@ -160,28 +201,34 @@ const AIChatAssistant = () => {
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask me anything..."
-            className="resize-none"
+            placeholder="Ask Echo anything..."
+            className="resize-none transition-all duration-300 focus:ring-2 focus:ring-primary/50"
             rows={2}
+            disabled={isLoading}
           />
           <div className="flex flex-col gap-2">
             <Button 
               type="submit" 
               size="icon" 
               disabled={isLoading || !input.trim()}
-              className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all duration-300"
+              className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all duration-300 hover:scale-105 active:scale-95"
             >
-              <Send className="h-4 w-4" />
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
             </Button>
             
-            {messages.length > 1 && messages[messages.length - 1].role === "assistant" && (
+            {messages.length > 1 && messages[messages.length - 1].role === "assistant" && 
+             messages[messages.length - 1].status === "error" && (
               <Button
                 type="button"
                 size="icon"
                 variant="outline"
                 onClick={handleRetry}
                 disabled={isLoading}
-                className="border-primary/20 hover:bg-primary/5 transition-all"
+                className="border-primary/20 hover:bg-primary/5 transition-all animate-fade-in"
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>

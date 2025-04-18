@@ -10,7 +10,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const SYSTEM_PROMPT = `You are a highly responsive, helpful, and intelligent AI assistant. Your main role is to instantly reply to users' messages with clear, accurate, and helpful information. You must always respond to every question or message sent to you — no matter how simple or complex — without delays.
+const SYSTEM_PROMPT = `You are a highly responsive, helpful, and intelligent AI assistant named Echo. Your main role is to instantly reply to users' messages with clear, accurate, and helpful information. You must always respond to every question or message sent to you — no matter how simple or complex — without delays.
 
 Prioritize quick, conversational responses while being friendly, engaging, and professional. Do not leave any message unanswered. If a user's question is unclear, politely ask for clarification instead of staying silent. Always aim to be useful and proactive.
 
@@ -30,6 +30,10 @@ serve(async (req) => {
     }
 
     console.log("Received message:", message.substring(0, 50) + "...")
+
+    if (!GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY is not configured')
+    }
 
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
@@ -75,7 +79,7 @@ serve(async (req) => {
     if (!response.ok) {
       const errorData = await response.text()
       console.error("Gemini API error:", errorData)
-      throw new Error(`Gemini API responded with status ${response.status}`)
+      throw new Error(`Gemini API responded with status ${response.status}: ${errorData}`)
     }
 
     const data = await response.json()
@@ -87,7 +91,7 @@ serve(async (req) => {
     
     const aiResponse = data.candidates[0].content.parts[0].text
 
-    console.log("AI response generated successfully")
+    console.log("AI response generated successfully:", aiResponse.substring(0, 50) + "...")
     
     return new Response(
       JSON.stringify({ response: aiResponse }),

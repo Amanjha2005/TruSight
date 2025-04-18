@@ -38,6 +38,8 @@ const AIChatAssistant = () => {
     if (!input.trim() || isLoading) return;
 
     const userMessage = { role: "user" as const, content: input };
+    const currentInput = input.trim();
+    
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
@@ -50,18 +52,26 @@ const AIChatAssistant = () => {
     }]);
 
     try {
+      console.log("Sending message to AI:", currentInput.substring(0, 50) + "...");
+      
       const { data, error } = await supabase.functions.invoke('ai-chat', {
-        body: { message: input }
+        body: { message: currentInput }
       });
 
       // Remove the loading message
-      setMessages(prev => prev.slice(0, -1));
+      setMessages(prev => prev.filter(msg => msg.status !== "loading"));
 
-      if (error) throw new Error(error.message || "Failed to get AI response");
+      if (error) {
+        console.error("Supabase function error:", error);
+        throw new Error(error.message || "Failed to get AI response");
+      }
       
       if (!data || !data.response) {
+        console.error("No response data:", data);
         throw new Error("No response received from AI");
       }
+      
+      console.log("AI response received successfully");
       
       setMessages(prev => [...prev, { 
         role: "assistant", 
@@ -71,13 +81,9 @@ const AIChatAssistant = () => {
       
       // Reset retry count on successful response
       setRetryCount(0);
-    } catch (error) {
+    } catch (error: any) {
       console.error("AI Chat Error:", error);
       
-      // Remove the loading message
-      setMessages(prev => prev.slice(0, -1));
-      
-      // Add error message as assistant response
       setMessages(prev => [...prev, { 
         role: "assistant", 
         content: "I'm sorry, I encountered an error processing your request. Please try again.",
@@ -87,14 +93,11 @@ const AIChatAssistant = () => {
       // Increment retry count
       setRetryCount(prev => prev + 1);
       
-      // Show toast only on first error
-      if (retryCount < 1) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to get AI response. Please try again later or with a different question.",
-        });
-      }
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to get AI response. Please try again later.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -103,26 +106,28 @@ const AIChatAssistant = () => {
   const handleRetry = async () => {
     if (messages.length < 2 || isLoading) return;
     
-    // Get the last user message
+    // Find the last user message
     const lastUserMessageIndex = [...messages].reverse().findIndex(m => m.role === "user");
-    
     if (lastUserMessageIndex === -1) return;
     
     const lastUserMessage = messages[messages.length - 1 - lastUserMessageIndex];
+    console.log("Retrying with message:", lastUserMessage.content.substring(0, 50) + "...");
     
     // Remove the last assistant message if it was an error
-    const newMessages = [...messages];
-    if (newMessages[newMessages.length - 1].role === "assistant") {
-      newMessages.pop();
-    }
+    setMessages(prev => {
+      const newMessages = [...prev];
+      if (newMessages[newMessages.length - 1].role === "assistant") {
+        newMessages.pop();
+      }
+      return newMessages;
+    });
     
-    setMessages(newMessages);
     setIsLoading(true);
 
-    // Add a temporary loading message
+    // Add a loading message
     setMessages(prev => [...prev, { 
       role: "assistant", 
-      content: "Thinking...",
+      content: "Retrying...",
       status: "loading" 
     }]);
     
@@ -132,13 +137,19 @@ const AIChatAssistant = () => {
       });
 
       // Remove the loading message
-      setMessages(prev => prev.slice(0, -1));
+      setMessages(prev => prev.filter(msg => msg.status !== "loading"));
 
-      if (error) throw new Error(error.message || "Failed to get AI response");
+      if (error) {
+        console.error("Retry error:", error);
+        throw new Error(error.message || "Failed to get AI response");
+      }
       
       if (!data || !data.response) {
-        throw new Error("No response received from AI");
+        console.error("No retry response data:", data);
+        throw new Error("No response received from AI on retry");
       }
+      
+      console.log("Retry successful");
       
       setMessages(prev => [...prev, { 
         role: "assistant", 
@@ -146,17 +157,14 @@ const AIChatAssistant = () => {
         status: "success" 
       }]);
 
-      // Reset retry count on successful response
+      // Reset retry count on successful retry
       setRetryCount(0);
     } catch (error) {
       console.error("AI Chat Retry Error:", error);
       
-      // Remove the loading message
-      setMessages(prev => prev.slice(0, -1));
-      
       setMessages(prev => [...prev, { 
         role: "assistant", 
-        content: "I'm still having trouble processing your request. Maybe try phrasing your question differently?",
+        content: "I'm still having trouble processing your request. Maybe try a different question?",
         status: "error"
       }]);
 

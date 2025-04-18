@@ -10,11 +10,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const SYSTEM_PROMPT = `You are a highly responsive, helpful, and intelligent AI assistant named Echo. Your main role is to instantly reply to users' messages with clear, accurate, and helpful information. You must always respond to every question or message sent to you — no matter how simple or complex — without delays.
-
-Prioritize quick, conversational responses while being friendly, engaging, and professional. Do not leave any message unanswered. If a user's question is unclear, politely ask for clarification instead of staying silent. Always aim to be useful and proactive.
-
-Your top priority is responsiveness, reliability, and helpfulness.`
+const SYSTEM_PROMPT = `You are Echo, a helpful AI assistant who provides accurate, concise, and friendly responses. You specialize in answering questions about deepfakes, media verification, and digital security, but can discuss any topic the user is interested in. Always respond in a conversational and engaging manner. If you're unsure about something, acknowledge it rather than providing incorrect information.`
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -26,15 +22,19 @@ serve(async (req) => {
     const { message } = await req.json()
     
     if (!message || typeof message !== 'string') {
+      console.error("Invalid message format received")
       throw new Error('Invalid message format')
     }
 
-    console.log("Received message:", message.substring(0, 50) + "...")
+    console.log(`Processing message: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"`)
 
     if (!GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY not configured")
       throw new Error('GEMINI_API_KEY is not configured')
     }
 
+    console.log("Sending request to Gemini API...")
+    
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
@@ -78,20 +78,20 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorData = await response.text()
-      console.error("Gemini API error:", errorData)
+      console.error(`Gemini API error (Status ${response.status}):`, errorData)
       throw new Error(`Gemini API responded with status ${response.status}: ${errorData}`)
     }
 
     const data = await response.json()
     
     if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
-      console.error("Unexpected API response structure:", JSON.stringify(data))
+      console.error("Unexpected API response structure:", JSON.stringify(data, null, 2))
       throw new Error("Unexpected API response structure")
     }
     
     const aiResponse = data.candidates[0].content.parts[0].text
 
-    console.log("AI response generated successfully:", aiResponse.substring(0, 50) + "...")
+    console.log(`AI response generated successfully (${aiResponse.length} chars)`)
     
     return new Response(
       JSON.stringify({ response: aiResponse }),
@@ -101,10 +101,11 @@ serve(async (req) => {
     )
   } catch (error) {
     console.error('Error processing request:', error)
+    
     return new Response(
       JSON.stringify({ 
         error: error.message || 'Failed to generate AI response',
-        details: error.stack
+        details: error.stack || 'No stack trace available'
       }),
       { 
         status: 500,

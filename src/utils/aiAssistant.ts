@@ -6,6 +6,6 @@ export const isDeepfakeRelatedQuery = (query: string): boolean => {
 
 export const getInitialMessage = () => ({
   role: "assistant" as const,
-  content: "Hello! I'm Echo, your AI assistant. I'm here to answer any questions about deepfakes, media verification, or any other topic you're curious about. Ask me anything and I'll respond instantly!",
+  content: "Hi there! I'm Echo, your AI assistant. I can answer questions about deepfakes, media verification, or any other topic you're curious about. How can I help you today?",
   status: "success" as const
 });

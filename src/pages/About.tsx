@@ -1,7 +1,6 @@
-
 import MainLayout from "@/layouts/MainLayout";
 import { Search, Users, AlertCircle, Brain, MessageCircle, Shield, Clock, BarChart } from "lucide-react";
-import AIChatAssistant from "@/components/AIChatAssistant";
+import AboutAIChat from "@/components/AboutAIChat";
 import { Card, CardContent } from "@/components/ui/card";
 
 const About = () => {
@@ -157,7 +156,7 @@ const About = () => {
               <p className="text-center text-muted-foreground mb-6">
                 Have questions about deepfakes or media verification? Echo is here to help.
               </p>
-              <AIChatAssistant />
+              <AboutAIChat />
             </CardContent>
           </Card>
         </section>

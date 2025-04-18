@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY')
+const GEMINI_API_KEY = "AIzaSyCYvFhNsK1rn4I1gMzsFCEgq3XC8He1PR4"
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent"
 
 const corsHeaders = {
@@ -10,7 +10,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const SYSTEM_PROMPT = `You are Echo, a helpful AI assistant who provides accurate, concise, and friendly responses. You specialize in answering questions about deepfakes, media verification, and digital security, but can discuss any topic. Always respond conversationally and engagingly. If unsure about something, acknowledge it rather than providing incorrect information.`
+const SYSTEM_PROMPT = `You are Echo, an AI assistant integrated into the About section of TruthLens. You help visitors understand deepfakes, media verification, and digital security. Keep your responses friendly, concise, and focused on helping users understand these topics. If you're unsure about something, be honest about it.`
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -27,11 +27,6 @@ serve(async (req) => {
     }
 
     console.log(`Processing message: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"`)
-
-    if (!GEMINI_API_KEY) {
-      console.error("GEMINI_API_KEY not configured")
-      throw new Error('GEMINI_API_KEY is not configured')
-    }
 
     console.log("Sending request to Gemini API...")
     

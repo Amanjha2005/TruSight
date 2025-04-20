@@ -12,7 +12,7 @@ const Footer = () => {
               <div className="flex items-center justify-center h-8 w-8 rounded-full bg-gradient-to-br from-primary to-accent text-white mr-2 shadow-md">
                 <Search className="h-4 w-4" />
               </div>
-              <span className="font-bold text-lg gradient-text">TruthLens</span>
+              <span className="font-bold text-lg gradient-text">TruSight</span>
             </div>
             <p className="text-muted-foreground text-sm">
               Protecting professionals from deepfake scams with advanced AI detection technology.

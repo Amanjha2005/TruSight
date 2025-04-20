@@ -20,7 +20,7 @@ const About = () => {
             <h2 className="text-3xl font-bold">Our Mission</h2>
             <div className="w-16 h-1 bg-primary/50 rounded-full"></div>
             <p className="text-lg text-muted-foreground">
-              TruthLens was created to protect individuals and businesses from the growing threat of deepfake scams in professional contexts. As AI-generated media becomes increasingly sophisticated, our mission is to provide accessible tools that help verify the authenticity of important communications.
+              TruSight was created to protect individuals and businesses from the growing threat of deepfake scams in professional contexts. As AI-generated media becomes increasingly sophisticated, our mission is to provide accessible tools that help verify the authenticity of important communications.
             </p>
             <p className="text-lg text-muted-foreground">
               We believe everyone deserves access to technology that helps them stay safe from increasingly sophisticated digital scams, especially in professional environments where trust is essential.

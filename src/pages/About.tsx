@@ -8,7 +8,7 @@ const About = () => {
     <MainLayout>
       <div className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-24">
         <section className="text-center space-y-6">
-          <h1 className="text-4xl md:text-5xl font-bold gradient-text inline-block">About TruthLens</h1>
+          <h1 className="text-4xl md:text-5xl font-bold gradient-text inline-block">About TruSight</h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Protecting professionals from deepfake scams with advanced AI detection technology
           </p>
@@ -46,7 +46,7 @@ const About = () => {
           <div className="text-center space-y-4">
             <h2 className="text-3xl font-bold">How It Works</h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              TruthLens uses state-of-the-art AI technology to analyze and verify the authenticity of media
+              TruSight uses state-of-the-art AI technology to analyze and verify the authenticity of media
             </p>
             <div className="w-20 h-1 bg-gradient-to-r from-primary to-accent rounded-full mx-auto"></div>
           </div>

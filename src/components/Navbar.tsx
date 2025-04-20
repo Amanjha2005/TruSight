@@ -28,7 +28,7 @@ const Navbar = () => {
               <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-primary to-accent text-white mr-3 shadow-md group-hover:shadow-lg transition-all duration-300">
                 <Search className="h-5 w-5" />
               </div>
-              <span className="text-xl font-bold gradient-text">TruthLens</span>
+              <span className="text-xl font-bold gradient-text">TruSight</span>
             </Link>
           </div>
           <div className="flex items-center space-x-5">

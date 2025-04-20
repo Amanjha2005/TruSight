@@ -51,7 +51,7 @@ const Footer = () => {
         <div className="pt-8 border-t border-gray-200 dark:border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-sm text-gray-500">
-              © {new Date().getFullYear()} TruthLens. All rights reserved.
+              © {new Date().getFullYear()} TruSight. All rights reserved.
             </div>
             <div className="flex space-x-4 mt-4 md:mt-0 text-xs text-gray-500">
               <span className="hover:text-primary cursor-pointer transition-colors">Privacy Policy</span>
